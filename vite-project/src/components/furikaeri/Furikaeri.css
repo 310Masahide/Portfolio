@@ -1,0 +1,396 @@
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.furikaeri-header {
+  border-bottom: 1px solid #fbcfe8;
+  padding: 24px 0;
+  position: sticky;
+  top: 0;
+  background: #fff1f6;
+  z-index: 10;
+}
+
+.furikaeri-header-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.furikaeri-header-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #999;
+  text-transform: uppercase;
+  font-family: Georgia, serif;
+}
+
+.furikaeri-title {
+  margin: 2px 0 0;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+.furikaeri-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.furikaeri-tab {
+  padding: 7px 16px;
+  border: 1px solid #e0ddd8;
+  border-radius: 20px;
+  background: transparent;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.furikaeri-tab.active {
+  border-color: #db2777;
+  background: #ec4899;
+  color: #fff;
+}
+
+.furikaeri-tab-history.active {
+  border-color: #db2777;
+  background: #ec4899;
+}
+
+.furikaeri-write,
+.furikaeri-history,
+.furikaeri-detail {
+  font-family: 'Hiragino Mincho ProN', Georgia, serif;
+}
+
+.furikaeri-date-label {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0 0 36px;
+  letter-spacing: 0.05em;
+}
+
+.furikaeri-field {
+  margin-bottom: 28px;
+}
+
+.furikaeri-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.furikaeri-field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.furikaeri-emoji {
+  font-size: 14px;
+}
+
+.furikaeri-field-name {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: #555;
+}
+
+.furikaeri-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #e8e4de;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  transition: background 0.3s;
+  box-sizing: border-box;
+}
+
+.furikaeri-textarea:focus {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+
+.furikaeri-voice-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.furikaeri-voice-btn {
+  padding: 8px 14px;
+  border: 1px solid #f5b4d6;
+  border-radius: 999px;
+  background: #fff5fa;
+  color: #be185d;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.furikaeri-voice-btn.icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.furikaeri-voice-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.furikaeri-voice-btn:hover {
+  border-color: #ec4899;
+}
+
+.furikaeri-voice-btn.stop {
+  border-color: #b07070;
+  color: #b07070;
+}
+
+.furikaeri-voice-status {
+  font-size: 12px;
+  color: #888;
+  letter-spacing: 0.05em;
+}
+
+.furikaeri-voice-error {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: #b07070;
+  letter-spacing: 0.02em;
+}
+
+.furikaeri-voice-preview {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px dashed #e8e4de;
+  border-radius: 10px;
+}
+
+.furikaeri-voice-preview-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #aaa;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.furikaeri-voice-preview-text {
+  font-size: 13px;
+  line-height: 1.9;
+  color: #444;
+  white-space: pre-wrap;
+}
+
+.furikaeri-analyze-btn {
+  width: 100%;
+  padding: 14px;
+  background: #ec4899;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.furikaeri-analyze-btn:disabled {
+  background: #f9a8d4;
+  cursor: not-allowed;
+}
+
+.furikaeri-ai-block {
+  margin-top: 32px;
+  padding: 28px;
+  background: #fff;
+  border: 1px solid #e8e4de;
+  border-radius: 10px;
+  animation: fadeSlideIn 0.5s ease;
+}
+
+.furikaeri-ai-block-detail {
+  margin-top: 8px;
+  padding: 24px;
+}
+
+.furikaeri-ai-label {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: #aaa;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.furikaeri-ai-text {
+  font-size: 16px;
+  line-height: 2.1;
+  color: #444;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.furikaeri-count {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0 0 28px;
+  letter-spacing: 0.05em;
+}
+
+.furikaeri-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.furikaeri-empty {
+  text-align: center;
+  color: #ccc;
+  padding: 60px 0;
+  font-size: 14px;
+}
+
+.furikaeri-history-card {
+  padding: 20px 24px;
+  border: 1px solid #e8e4de;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  cursor: default;
+  background: #fff;
+  transition: all 0.15s;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.furikaeri-history-card:hover {
+  border-color: #bbb;
+}
+
+.furikaeri-history-date {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
+}
+
+.furikaeri-today-badge {
+  color: #6b9e78;
+  margin-right: 8px;
+  font-size: 11px;
+}
+
+.furikaeri-history-preview {
+  font-size: 13px;
+  color: #555;
+  display: flex;
+  gap: 16px;
+}
+
+.furikaeri-history-arrow {
+  color: #ccc;
+  font-size: 18px;
+}
+
+.furikaeri-history-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.furikaeri-history-open,
+.furikaeri-history-delete {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #f5b4d6;
+  background: #fff5fa;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  color: #be185d;
+}
+
+.furikaeri-history-open:hover,
+.furikaeri-history-delete:hover {
+  border-color: #ec4899;
+}
+
+.furikaeri-history-delete {
+  color: #be185d;
+  border-color: #f9a8d4;
+}
+
+
+.furikaeri-back-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 0 28px;
+  letter-spacing: 0.05em;
+  font-family: inherit;
+}
+
+.furikaeri-detail .furikaeri-date-label {
+  margin: 0 0 32px;
+}
+
+.furikaeri-detail-block {
+  margin-bottom: 28px;
+}
+
+.furikaeri-detail-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #888;
+  letter-spacing: 0.1em;
+}
+
+.furikaeri-detail-content {
+  font-size: 14px;
+  line-height: 2;
+  color: #444;
+  margin: 0;
+  padding: 16px;
+  border-radius: 8px;
+}
