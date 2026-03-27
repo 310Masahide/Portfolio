@@ -7,6 +7,7 @@ interface FurikaeriWriteViewProps {
   form: FurikaeriForm
   setFormField: <K extends keyof FurikaeriForm>(key: K, value: string) => void
   aiResponse: string
+  showAiReflection: boolean
   loading: boolean
   onAnalyze: () => void
   isVoiceSupported: boolean
@@ -22,6 +23,7 @@ export function FurikaeriWriteView({
   form,
   setFormField,
   aiResponse,
+  showAiReflection,
   loading,
   onAnalyze,
   isVoiceSupported,
@@ -31,7 +33,7 @@ export function FurikaeriWriteView({
   onStartVoice,
   onStopVoice,
 }: FurikaeriWriteViewProps) {
-  const hasContent = Boolean(form.events)
+  const hasContent = form.events.trim().length > 0
 
   return (
     <div className="furikaeri-write">
@@ -95,7 +97,7 @@ export function FurikaeriWriteView({
 
         <textarea
           className="furikaeri-textarea"
-          data-filled={Boolean(form.events)}
+          data-filled={hasContent}
           value={form.events}
           onChange={(e) => setFormField('events', e.target.value)}
           placeholder={'例）\n- 仕事でミスして落ち込んだ\n- 夕方に散歩して少し回復した\n- 明日は朝イチで優先タスクから着手する'}
@@ -119,7 +121,7 @@ export function FurikaeriWriteView({
         {loading ? 'AIが振り返っています…' : 'AIに俯瞰してもらう'}
       </button>
 
-      {aiResponse && (
+      {showAiReflection && (
         <div className="furikaeri-ai-block">
           <div className="furikaeri-ai-label">AI Reflection</div>
           <p className="furikaeri-ai-text">{aiResponse}</p>
