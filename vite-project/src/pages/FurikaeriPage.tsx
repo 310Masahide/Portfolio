@@ -12,6 +12,7 @@ export default function FurikaeriPage() {
     form,
     setFormField,
     aiResponse,
+    showAiReflection,
     loading,
     selectedEntry,
     fadeIn,
@@ -51,6 +52,7 @@ export default function FurikaeriPage() {
             form={form}
             setFormField={setFormField}
             aiResponse={aiResponse}
+            showAiReflection={showAiReflection}
             loading={loading}
             onAnalyze={handleAnalyze}
             isVoiceSupported={isVoiceSupported}

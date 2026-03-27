@@ -18,6 +18,8 @@ export function useFurikaeri() {
 
   const todayKey = getTodayKey()
   const recordingBaseRef = useRef<string>('')
+  /** いまの aiResponse がどの events 文字列に対するものか（入力が変わったら表示しない） */
+  const aiSourceEventsRef = useRef<string | null>(null)
 
   const speech = useSpeechRecognition()
   const speechError = speech.error
@@ -32,6 +34,9 @@ export function useFurikaeri() {
     if (today) {
       setForm({ events: today.events ?? '' })
       setAiResponse(today.aiResponse ?? '')
+      aiSourceEventsRef.current = today.aiResponse ? (today.events ?? '') : null
+    } else {
+      aiSourceEventsRef.current = null
     }
   }, [entries, todayKey])
 
@@ -53,22 +58,32 @@ export function useFurikaeri() {
   )
 
   const handleAnalyze = useCallback(async () => {
-    if (!form.events) return
+    if (!form.events.trim()) return
+    const snapshot = form.events
     setLoading(true)
     setAiResponse('')
     try {
       const text = await analyzeFurikaeri(form)
       setAiResponse(text)
       saveEntry(text)
+      aiSourceEventsRef.current = snapshot
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Unknown error'
       setAiResponse(`エラーが発生しました: ${msg}`)
+      aiSourceEventsRef.current = snapshot
     } finally {
       setLoading(false)
     }
   }, [form, saveEntry])
 
   const sortedDates = Object.keys(entries).sort((a, b) => b.localeCompare(a))
+
+  const showAiReflection = useMemo(() => {
+    if (!aiResponse) return false
+    const src = aiSourceEventsRef.current
+    if (src === null) return false
+    return form.events.trim() === src.trim()
+  }, [aiResponse, form.events])
 
   const setFormField = useCallback(<K extends keyof FurikaeriForm>(key: K, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -128,6 +143,7 @@ export function useFurikaeri() {
     form,
     setFormField,
     aiResponse,
+    showAiReflection,
     loading,
     selectedEntry,
     fadeIn,
