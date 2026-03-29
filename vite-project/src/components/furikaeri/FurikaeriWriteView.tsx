@@ -1,11 +1,13 @@
 import type { FurikaeriForm } from '../../types/furikaeri'
 import { formatDate } from '../../utils/date'
+import { FURIKAERI_TAG_OPTIONS } from '../../constants/furikaeriTags'
 import './Furikaeri.css'
 
 interface FurikaeriWriteViewProps {
   todayKey: string
   form: FurikaeriForm
-  setFormField: <K extends keyof FurikaeriForm>(key: K, value: string) => void
+  setFormField: <K extends keyof FurikaeriForm>(key: K, value: FurikaeriForm[K]) => void
+  onToggleTag: (tag: string) => void
   aiResponse: string
   showAiReflection: boolean
   loading: boolean
@@ -22,6 +24,7 @@ export function FurikaeriWriteView({
   todayKey,
   form,
   setFormField,
+  onToggleTag,
   aiResponse,
   showAiReflection,
   loading,
@@ -110,6 +113,22 @@ export function FurikaeriWriteView({
             <div className="furikaeri-voice-preview-text">{liveTranscript}</div>
           </div>
         )}
+      </div>
+
+      <div className="furikaeri-tags-field">
+        <span className="furikaeri-tags-label">タグ（任意）</span>
+        <div className="furikaeri-tags-row">
+          {FURIKAERI_TAG_OPTIONS.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className={`furikaeri-tag-chip ${form.tags.includes(tag) ? 'on' : ''}`}
+              onClick={() => onToggleTag(tag)}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
       </div>
 
       <button
