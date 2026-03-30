@@ -1,8 +1,10 @@
 import { useFurikaeri } from '../hooks/useFurikaeri'
+import '../components/furikaeri/Furikaeri.css'
 import { FurikaeriHeader } from '../components/furikaeri/FurikaeriHeader'
 import { FurikaeriWriteView } from '../components/furikaeri/FurikaeriWriteView'
 import { FurikaeriHistoryView } from '../components/furikaeri/FurikaeriHistoryView'
 import { FurikaeriDetailView } from '../components/furikaeri/FurikaeriDetailView'
+import { FurikaeriStatsView } from '../components/furikaeri/FurikaeriStatsView'
 
 export default function FurikaeriPage() {
   const {
@@ -11,12 +13,37 @@ export default function FurikaeriPage() {
     entries,
     form,
     setFormField,
+    toggleFormTag,
     aiResponse,
+    showAiReflection,
     loading,
     selectedEntry,
     fadeIn,
     todayKey,
-    sortedDates,
+    paginatedDates,
+    historyQuery,
+    setHistoryQuery,
+    dateFrom,
+    dateTo,
+    setDateFrom,
+    setDateTo,
+    applyDatePreset,
+    historyTagFilter,
+    toggleHistoryTagFilter,
+    favoritesOnly,
+    setFavoritesOnly,
+    allTagsInUse,
+    historyPage,
+    setHistoryPage,
+    totalPages,
+    totalFiltered,
+    pageSize,
+    historyMode,
+    setHistoryMode,
+    calendarYear,
+    calendarMonth,
+    setCalendarYear,
+    setCalendarMonth,
     handleAnalyze,
     openDetail,
     goBackToHistory,
@@ -28,29 +55,28 @@ export default function FurikaeriPage() {
     stopVoiceInput,
     handleClearAll,
     handleDeleteOne,
+    togglePin,
+    updateEntryTags,
+    exportJson,
+    exportText,
+    importBackupJson,
   } = useFurikaeri()
 
+  const detailEntry = selectedEntry ? entries[selectedEntry.date] ?? selectedEntry : null
+
   return (
-    <div
-      className="furikaeri-app"
-      style={{
-        fontFamily: "'Hiragino Mincho ProN', Georgia, serif",
-        minHeight: '100vh',
-        background: '#fff1f6',
-        color: '#2C2C2C',
-        opacity: fadeIn ? 1 : 0,
-        transition: 'opacity 0.6s ease',
-      }}
-    >
+    <div className={`furikaeri-app${fadeIn ? ' furikaeri-app--ready' : ''}`}>
       <FurikaeriHeader view={view} onViewChange={setView} />
 
-      <main style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px 80px' }}>
+      <main className="furikaeri-main">
         {view === 'write' && (
           <FurikaeriWriteView
             todayKey={todayKey}
             form={form}
             setFormField={setFormField}
+            onToggleTag={toggleFormTag}
             aiResponse={aiResponse}
+            showAiReflection={showAiReflection}
             loading={loading}
             onAnalyze={handleAnalyze}
             isVoiceSupported={isVoiceSupported}
@@ -64,18 +90,52 @@ export default function FurikaeriPage() {
 
         {view === 'history' && (
           <FurikaeriHistoryView
-            sortedDates={sortedDates}
             entries={entries}
             todayKey={todayKey}
+            paginatedDates={paginatedDates}
+            totalFiltered={totalFiltered}
+            historyPage={historyPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            setHistoryPage={setHistoryPage}
+            historyQuery={historyQuery}
+            setHistoryQuery={setHistoryQuery}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            setDateFrom={setDateFrom}
+            setDateTo={setDateTo}
+            applyDatePreset={applyDatePreset}
+            historyTagFilter={historyTagFilter}
+            toggleHistoryTagFilter={toggleHistoryTagFilter}
+            allTagsInUse={allTagsInUse}
+            favoritesOnly={favoritesOnly}
+            setFavoritesOnly={setFavoritesOnly}
+            historyMode={historyMode}
+            setHistoryMode={setHistoryMode}
+            calendarYear={calendarYear}
+            calendarMonth={calendarMonth}
+            setCalendarYear={setCalendarYear}
+            setCalendarMonth={setCalendarMonth}
             onSelect={openDetail}
             onClearAll={handleClearAll}
             onDeleteOne={handleDeleteOne}
+            onTogglePin={togglePin}
+            exportJson={exportJson}
+            exportText={exportText}
+            importBackupJson={importBackupJson}
           />
         )}
 
-        {view === 'detail' && selectedEntry && (
-          <FurikaeriDetailView entry={selectedEntry} onBack={goBackToHistory} />
+        {view === 'detail' && detailEntry && (
+          <FurikaeriDetailView
+            entry={detailEntry}
+            onBack={goBackToHistory}
+            onTogglePin={() => togglePin(detailEntry.date)}
+            onUpdateTags={(tags) => updateEntryTags(detailEntry.date, tags)}
+          />
         )}
+
+        {view === 'stats' && <FurikaeriStatsView entries={entries} />}
       </main>
     </div>
   )

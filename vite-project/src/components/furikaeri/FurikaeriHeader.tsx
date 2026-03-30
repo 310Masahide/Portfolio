@@ -9,6 +9,7 @@ interface FurikaeriHeaderProps {
 const tabs: [FurikaeriView, string][] = [
   ['write', '今日'],
   ['history', '履歴'],
+  ['stats', '統計'],
 ]
 
 export function FurikaeriHeader({ view, onViewChange }: FurikaeriHeaderProps) {
