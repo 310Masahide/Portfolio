@@ -8,4 +8,5 @@ export const FURIKAERI_TAG_OPTIONS = [
   '趣味',
   '感情',
   'お金',
+  'その他',
 ] as const
