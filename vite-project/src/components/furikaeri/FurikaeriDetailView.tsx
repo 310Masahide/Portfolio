@@ -62,6 +62,7 @@ export function FurikaeriDetailView({
               type="button"
               className={`furikaeri-tag-chip ${tags.includes(tag) ? 'on' : ''}`}
               onClick={() => toggleTag(tag)}
+              aria-pressed={tags.includes(tag)}
             >
               {tag}
             </button>
@@ -85,7 +86,7 @@ export function FurikaeriDetailView({
 
       <div className="furikaeri-detail-block">
         <div className="furikaeri-detail-label">
-          <span>今日は何がありましたか？</span>
+          <span>出来事</span>
         </div>
         <p className="furikaeri-detail-content" style={{ background: '#fff' }}>
           {entry.events || '（未入力）'}

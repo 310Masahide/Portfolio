@@ -18,6 +18,9 @@ export function useSpeechRecognition() {
     setError(null)
     setTranscript('')
 
+    recognitionRef.current?.abort()
+    recognitionRef.current = null
+
     const Recognition =
       (typeof SpeechRecognition !== 'undefined'
         ? SpeechRecognition
