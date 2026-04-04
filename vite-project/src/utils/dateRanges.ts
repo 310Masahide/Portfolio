@@ -1,18 +1,14 @@
-/** YYYY-MM-DD */
-export function toDateKey(d: Date): string {
-  return d.toISOString().split('T')[0]
-}
+import { formatLocalDateKey } from './date'
 
-export function parseDateKey(key: string): Date {
-  const [y, m, day] = key.split('-').map(Number)
-  return new Date(y, m - 1, day)
+/** YYYY-MM-DD（ローカル日付） */
+export function toDateKey(d: Date): string {
+  return formatLocalDateKey(d.getFullYear(), d.getMonth(), d.getDate())
 }
 
 /** 月の1日と最終日のキー（ローカル） */
-export function monthRangeKeys(year: number, monthIndex0: string | number): { from: string; to: string } {
-  const m = typeof monthIndex0 === 'string' ? parseInt(monthIndex0, 10) : monthIndex0
-  const first = new Date(year, m, 1)
-  const last = new Date(year, m + 1, 0)
+export function monthRangeKeys(year: number, monthIndex0: number): { from: string; to: string } {
+  const first = new Date(year, monthIndex0, 1)
+  const last = new Date(year, monthIndex0 + 1, 0)
   return { from: toDateKey(first), to: toDateKey(last) }
 }
 

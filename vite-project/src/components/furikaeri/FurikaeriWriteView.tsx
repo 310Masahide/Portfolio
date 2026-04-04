@@ -124,6 +124,7 @@ export function FurikaeriWriteView({
               type="button"
               className={`furikaeri-tag-chip ${form.tags.includes(tag) ? 'on' : ''}`}
               onClick={() => onToggleTag(tag)}
+              aria-pressed={form.tags.includes(tag)}
             >
               {tag}
             </button>
