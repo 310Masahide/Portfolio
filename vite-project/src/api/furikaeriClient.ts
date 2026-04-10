@@ -26,18 +26,40 @@ type GeminiResponse = {
   error?: { message?: string; status?: string }
 }
 
-async function requestGemini(prompt: string): Promise<{ text: string; finishReason?: string }> {
-  const res = await fetch(GEMINI_API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt }),
-  })
+const prodApiHint =
+  '（本番の静的配信では /api/gemini が無いことが多いです。npm run dev で試すか、別途プロキシを用意してください。）'
 
-  const data = (await res.json()) as GeminiResponse
+async function requestGemini(
+  prompt: string,
+  signal?: AbortSignal,
+): Promise<{ text: string; finishReason?: string }> {
+  let res: Response
+  try {
+    res = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+      signal,
+    })
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') throw e
+    const msg = e instanceof Error ? e.message : 'Network error'
+    const hint = import.meta.env.PROD ? ` ${prodApiHint}` : ''
+    return { text: `エラー: 通信に失敗しました (${msg})${hint}` }
+  }
+
+  let data: GeminiResponse
+  try {
+    data = (await res.json()) as GeminiResponse
+  } catch {
+    const hint = import.meta.env.PROD && res.status === 404 ? ` ${prodApiHint}` : ''
+    return { text: `エラー: レスポンスの解析に失敗しました (HTTP ${res.status})${hint}` }
+  }
 
   if (!res.ok) {
     const msg = data?.error?.message ?? `HTTP ${res.status}`
-    return { text: `エラー: ${msg}` }
+    const hint = import.meta.env.PROD && (res.status === 404 || res.status === 405) ? ` ${prodApiHint}` : ''
+    return { text: `エラー: ${msg}${hint}` }
   }
 
   const parts = data.candidates?.[0]?.content?.parts ?? []
@@ -49,7 +71,15 @@ function tail(text: string, maxChars: number): string {
   return text.length > maxChars ? text.slice(-maxChars) : text
 }
 
-export async function analyzeFurikaeri(form: FurikaeriForm): Promise<string> {
+export type AnalyzeFurikaeriOptions = {
+  signal?: AbortSignal
+}
+
+export async function analyzeFurikaeri(
+  form: FurikaeriForm,
+  options?: AnalyzeFurikaeriOptions,
+): Promise<string> {
+  const signal = options?.signal
   const basePrompt = buildPrompt(form)
 
   const contPrompt = (prevText: string) =>
@@ -61,8 +91,11 @@ export async function analyzeFurikaeri(form: FurikaeriForm): Promise<string> {
   let lastText = ''
 
   for (let i = 0; i < maxRequests; i++) {
+    if (signal?.aborted) {
+      throw new DOMException('Analyze aborted', 'AbortError')
+    }
     const prompt = i === 0 ? basePrompt : contPrompt(lastText || combined)
-    const r = await requestGemini(prompt)
+    const r = await requestGemini(prompt, signal)
     if (r.text.startsWith('エラー:')) return r.text
 
     const cleaned = r.text.replace(/\n*---END---\s*$/, '').trim()

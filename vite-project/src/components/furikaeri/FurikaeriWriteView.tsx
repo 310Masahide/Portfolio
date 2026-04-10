@@ -1,12 +1,15 @@
 import type { FurikaeriForm } from '../../types/furikaeri'
 import { formatDate } from '../../utils/date'
+import { FURIKAERI_TAG_OPTIONS } from '../../constants/furikaeriTags'
 import './Furikaeri.css'
 
 interface FurikaeriWriteViewProps {
   todayKey: string
   form: FurikaeriForm
-  setFormField: <K extends keyof FurikaeriForm>(key: K, value: string) => void
+  setFormField: <K extends keyof FurikaeriForm>(key: K, value: FurikaeriForm[K]) => void
+  onToggleTag: (tag: string) => void
   aiResponse: string
+  showAiReflection: boolean
   loading: boolean
   onAnalyze: () => void
   isVoiceSupported: boolean
@@ -21,7 +24,9 @@ export function FurikaeriWriteView({
   todayKey,
   form,
   setFormField,
+  onToggleTag,
   aiResponse,
+  showAiReflection,
   loading,
   onAnalyze,
   isVoiceSupported,
@@ -31,7 +36,7 @@ export function FurikaeriWriteView({
   onStartVoice,
   onStopVoice,
 }: FurikaeriWriteViewProps) {
-  const hasContent = Boolean(form.events)
+  const hasContent = form.events.trim().length > 0
 
   return (
     <div className="furikaeri-write">
@@ -95,7 +100,7 @@ export function FurikaeriWriteView({
 
         <textarea
           className="furikaeri-textarea"
-          data-filled={Boolean(form.events)}
+          data-filled={hasContent}
           value={form.events}
           onChange={(e) => setFormField('events', e.target.value)}
           placeholder={'例）\n- 仕事でミスして落ち込んだ\n- 夕方に散歩して少し回復した\n- 明日は朝イチで優先タスクから着手する'}
@@ -110,16 +115,40 @@ export function FurikaeriWriteView({
         )}
       </div>
 
+      <div className="furikaeri-tags-field">
+        <span className="furikaeri-tags-label">タグ（任意）</span>
+        <div className="furikaeri-tags-row">
+          {FURIKAERI_TAG_OPTIONS.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className={`furikaeri-tag-chip ${form.tags.includes(tag) ? 'on' : ''}`}
+              onClick={() => onToggleTag(tag)}
+              aria-pressed={form.tags.includes(tag)}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button
         type="button"
         className="furikaeri-analyze-btn"
         onClick={onAnalyze}
         disabled={loading || !hasContent}
+        aria-busy={loading}
       >
         {loading ? 'AIが振り返っています…' : 'AIに俯瞰してもらう'}
       </button>
 
-      {aiResponse && (
+      {loading && (
+        <p className="furikaeri-sr-only" aria-live="polite" aria-atomic="true">
+          AIが振り返っています。しばらくお待ちください。
+        </p>
+      )}
+
+      {showAiReflection && (
         <div className="furikaeri-ai-block">
           <div className="furikaeri-ai-label">AI Reflection</div>
           <p className="furikaeri-ai-text">{aiResponse}</p>

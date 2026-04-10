@@ -18,6 +18,9 @@ export function useSpeechRecognition() {
     setError(null)
     setTranscript('')
 
+    recognitionRef.current?.abort()
+    recognitionRef.current = null
+
     const Recognition =
       (typeof SpeechRecognition !== 'undefined'
         ? SpeechRecognition
@@ -56,12 +59,6 @@ export function useSpeechRecognition() {
     setIsListening(false)
   }, [])
 
-  const abort = useCallback(() => {
-    recognitionRef.current?.abort()
-    recognitionRef.current = null
-    setIsListening(false)
-  }, [])
-
   const resetTranscript = useCallback(() => {
     setTranscript('')
     setError(null)
@@ -81,7 +78,6 @@ export function useSpeechRecognition() {
     error,
     start,
     stop,
-    abort,
     resetTranscript,
   }
 }

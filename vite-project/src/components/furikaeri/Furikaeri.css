@@ -1,3 +1,66 @@
+.furikaeri-app {
+  --furikaeri-font-body: 'Hiragino Mincho ProN', Georgia, serif;
+  --furikaeri-font-label: Georgia, serif;
+  font-family: var(--furikaeri-font-body);
+  min-height: 100vh;
+  background: #fff4eb;
+  color: #2c2c2c;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.furikaeri-app.furikaeri-app--ready {
+  opacity: 1;
+}
+
+.furikaeri-storage-banner {
+  border-bottom: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.furikaeri-storage-banner-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.furikaeri-storage-banner p {
+  margin: 0;
+  flex: 1;
+}
+
+.furikaeri-storage-banner-dismiss {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid #dc2626;
+  background: #fff;
+  color: #991b1b;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.furikaeri-storage-banner-dismiss:hover {
+  background: #fee2e2;
+}
+
+.furikaeri-app :where(button, input, textarea, select) {
+  font-family: inherit;
+}
+
+.furikaeri-main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
 @keyframes fadeSlideIn {
   from {
     opacity: 0;
@@ -10,11 +73,11 @@
 }
 
 .furikaeri-header {
-  border-bottom: 1px solid #fbcfe8;
+  border-bottom: 1px solid #fed7aa;
   padding: 24px 0;
   position: sticky;
   top: 0;
-  background: #fff1f6;
+  background: #fff4eb;
   z-index: 10;
 }
 
@@ -32,7 +95,7 @@
   letter-spacing: 0.2em;
   color: #999;
   text-transform: uppercase;
-  font-family: Georgia, serif;
+  font-family: var(--furikaeri-font-label);
 }
 
 .furikaeri-title {
@@ -49,32 +112,31 @@
 
 .furikaeri-tab {
   padding: 7px 16px;
-  border: 1px solid #e0ddd8;
+  border: 1px solid #fdba74;
   border-radius: 20px;
-  background: transparent;
-  color: #888;
+  background: #fff;
+  color: #c2410c;
   font-size: 13px;
   cursor: pointer;
   letter-spacing: 0.05em;
   transition: all 0.2s;
-  font-family: inherit;
+}
+
+.furikaeri-tab:hover {
+  background: #ffedd5;
 }
 
 .furikaeri-tab.active {
-  border-color: #db2777;
-  background: #ec4899;
+  border-color: #fb923c;
+  background: #fdba74;
   color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(124, 45, 18, 0.35);
 }
 
 .furikaeri-tab-history.active {
-  border-color: #db2777;
-  background: #ec4899;
-}
-
-.furikaeri-write,
-.furikaeri-history,
-.furikaeri-detail {
-  font-family: 'Hiragino Mincho ProN', Georgia, serif;
+  border-color: #fb923c;
+  background: #fdba74;
 }
 
 .furikaeri-date-label {
@@ -124,7 +186,6 @@
   color: #333;
   resize: vertical;
   outline: none;
-  font-family: inherit;
   transition: background 0.3s;
   box-sizing: border-box;
 }
@@ -143,15 +204,16 @@
 
 .furikaeri-voice-btn {
   padding: 8px 14px;
-  border: 1px solid #f5b4d6;
+  border: 1px solid #fb923c;
   border-radius: 999px;
-  background: #fff5fa;
-  color: #be185d;
+  background: #fdba74;
+  color: #fff;
   font-size: 13px;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(124, 45, 18, 0.28);
   cursor: pointer;
   letter-spacing: 0.05em;
   transition: all 0.15s;
-  font-family: inherit;
 }
 
 .furikaeri-voice-btn.icon {
@@ -170,12 +232,14 @@
 }
 
 .furikaeri-voice-btn:hover {
-  border-color: #ec4899;
+  background: #ea580c;
+  border-color: #fb923c;
 }
 
 .furikaeri-voice-btn.stop {
-  border-color: #b07070;
-  color: #b07070;
+  border-color: #c2410c;
+  background: #ea580c;
+  color: #fff;
 }
 
 .furikaeri-voice-status {
@@ -217,19 +281,27 @@
 .furikaeri-analyze-btn {
   width: 100%;
   padding: 14px;
-  background: #ec4899;
+  background: #fdba74;
   color: #fff;
-  border: none;
+  border: 1px solid #fb923c;
   border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(124, 45, 18, 0.28);
   letter-spacing: 0.15em;
   cursor: pointer;
   transition: all 0.2s;
-  font-family: inherit;
+}
+
+.furikaeri-analyze-btn:hover:not(:disabled) {
+  background: #ea580c;
 }
 
 .furikaeri-analyze-btn:disabled {
-  background: #f9a8d4;
+  background: #fed7aa;
+  border-color: #fdba74;
+  color: #fff;
+  opacity: 0.95;
   cursor: not-allowed;
 }
 
@@ -337,35 +409,40 @@
 .furikaeri-history-delete {
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid #f5b4d6;
-  background: #fff5fa;
+  border: 1px solid #fb923c;
+  background: #fdba74;
   font-size: 12px;
   cursor: pointer;
-  font-family: inherit;
   transition: all 0.15s;
-  color: #be185d;
+  color: #fff;
 }
 
 .furikaeri-history-open:hover,
 .furikaeri-history-delete:hover {
-  border-color: #ec4899;
+  background: #ea580c;
+  border-color: #fb923c;
 }
 
 .furikaeri-history-delete {
-  color: #be185d;
-  border-color: #f9a8d4;
+  border-color: #fb923c;
+  background: #ea580c;
 }
 
 
 .furikaeri-back-btn {
-  background: none;
-  border: none;
-  color: #888;
+  background: #fdba74;
+  border: 1px solid #fb923c;
+  color: #fff;
   font-size: 13px;
   cursor: pointer;
-  padding: 0 0 28px;
+  padding: 8px 14px;
+  margin: 0 0 20px;
+  border-radius: 999px;
   letter-spacing: 0.05em;
-  font-family: inherit;
+}
+
+.furikaeri-back-btn:hover {
+  background: #ea580c;
 }
 
 .furikaeri-detail .furikaeri-date-label {
@@ -393,4 +470,738 @@
   margin: 0;
   padding: 16px;
   border-radius: 8px;
+  background: #fff;
+}
+
+/* —— 履歴ツールバー・検索・ページネーション —— */
+.furikaeri-history-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.furikaeri-export-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #fb923c;
+  background: #fdba74;
+  font-size: 12px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.furikaeri-export-btn:hover {
+  background: #ea580c;
+  border-color: #fb923c;
+}
+
+.furikaeri-history-mode {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.furikaeri-mode-tab {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #fdba74;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  color: #c2410c;
+}
+
+.furikaeri-mode-tab:hover {
+  background: #ffedd5;
+}
+
+.furikaeri-mode-tab.active {
+  border-color: #fb923c;
+  background: #fdba74;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(124, 45, 18, 0.35);
+}
+
+.furikaeri-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+}
+
+.furikaeri-toolbar-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #aaa;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.furikaeri-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid #e8e4de;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.furikaeri-presets .furikaeri-preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.furikaeri-preset-btn {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #fb923c;
+  background: #fdba74;
+  font-size: 12px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.furikaeri-preset-btn:hover {
+  background: #ea580c;
+  border-color: #fb923c;
+}
+
+.furikaeri-preset-clear {
+  background: #fed7aa;
+  border-color: #fdba74;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(124, 45, 18, 0.25);
+}
+
+.furikaeri-preset-clear:hover {
+  background: #fdba74;
+  border-color: #fb923c;
+}
+
+.furikaeri-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.furikaeri-date-triplet {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.furikaeri-date-select {
+  padding: 8px 8px;
+  border: 1px solid #e8e4de;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+  color: #333;
+  min-width: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.furikaeri-date-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+
+.furikaeri-date-triplet .furikaeri-date-select:nth-child(1) {
+  min-width: 4.75rem;
+}
+
+.furikaeri-date-triplet .furikaeri-date-select:nth-child(2) {
+  min-width: 3.25rem;
+}
+
+.furikaeri-date-triplet .furikaeri-date-select:nth-child(3) {
+  min-width: 3.25rem;
+}
+
+.furikaeri-date-input {
+  padding: 8px 10px;
+  border: 1px solid #e8e4de;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* 期間検索: カレンダーアイコンを非表示（プリセット・キーボード入力で指定） */
+.furikaeri-date-input::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+.furikaeri-date-input::-moz-calendar-picker-indicator {
+  display: none;
+}
+
+.furikaeri-date-tilde {
+  color: #aaa;
+}
+
+.furikaeri-fav-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+
+.furikaeri-tag-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.furikaeri-tag-filter-chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid #e8e4de;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  color: #777;
+}
+
+.furikaeri-tag-filter-chip.on {
+  border-color: #fb923c;
+  background: #fdba74;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(124, 45, 18, 0.3);
+}
+
+.furikaeri-search-hit {
+  background: #fef08a;
+  color: #1a1a1a;
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+.furikaeri-pin-badge {
+  color: #ca8a04;
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.furikaeri-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 6px;
+}
+
+.furikaeri-card-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.furikaeri-pin-btn {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #fb923c;
+  background: #fdba74;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.furikaeri-pin-btn:hover {
+  background: #ea580c;
+}
+
+.furikaeri-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #fed7aa;
+}
+
+.furikaeri-page-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #fb923c;
+  background: #fdba74;
+  font-size: 13px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.furikaeri-page-btn:hover:not(:disabled) {
+  background: #ea580c;
+}
+
+.furikaeri-page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.furikaeri-page-info {
+  font-size: 12px;
+  color: #888;
+}
+
+/* カレンダー */
+.furikaeri-calendar {
+  padding: 8px 0 24px;
+}
+
+.furikaeri-calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.furikaeri-calendar-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #fb923c;
+  background: #fdba74;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  color: #fff;
+}
+
+.furikaeri-calendar-nav-btn:hover {
+  background: #ea580c;
+}
+
+.furikaeri-calendar-title {
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+
+.furikaeri-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.furikaeri-calendar-wd {
+  text-align: center;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.furikaeri-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.furikaeri-calendar-cell-empty {
+  min-height: 44px;
+}
+
+.furikaeri-calendar-day {
+  min-height: 52px;
+  border: 1px solid #f0ebe5;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 3px 5px;
+}
+
+.furikaeri-calendar-day:disabled {
+  cursor: default;
+  opacity: 0.35;
+  background: #fafafa;
+}
+
+.furikaeri-calendar-day.has-entry:not(:disabled) {
+  border-color: #fdba74;
+  background: #ffedd5;
+}
+
+.furikaeri-calendar-day.is-today {
+  font-weight: 700;
+}
+
+.furikaeri-calendar-day-num {
+  font-size: 13px;
+  color: #444;
+}
+
+.furikaeri-calendar-month-empty {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #fdba74;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.furikaeri-calendar-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 5px 4px;
+  border-radius: 10px;
+  background: #ea580c;
+  color: #fff;
+  line-height: 1.15;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.furikaeri-calendar-badge-label {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  opacity: 0.95;
+}
+
+.furikaeri-calendar-badge-value {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.furikaeri-calendar-badge-unit {
+  font-size: 9px;
+  font-weight: 700;
+  margin-left: 1px;
+}
+
+.furikaeri-calendar-hint {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* 今日画面タグ */
+.furikaeri-tags-field {
+  margin: 20px 0 8px;
+}
+
+.furikaeri-tags-label {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 10px;
+  letter-spacing: 0.08em;
+}
+
+.furikaeri-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.furikaeri-tag-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #e8e4de;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  color: #666;
+}
+
+.furikaeri-tag-chip.on {
+  border-color: #fb923c;
+  background: #fdba74;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 1px rgba(124, 45, 18, 0.3);
+}
+
+/* 詳細 */
+.furikaeri-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.furikaeri-detail-head .furikaeri-date-label {
+  margin: 0;
+}
+
+.furikaeri-detail-pin {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #fb923c;
+  background: #fdba74;
+  font-size: 12px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.furikaeri-detail-pin:hover {
+  background: #ea580c;
+}
+
+.furikaeri-detail-tags-edit {
+  margin-bottom: 24px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+}
+
+.furikaeri-custom-tag-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.furikaeri-custom-tag-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid #e8e4de;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.furikaeri-custom-tag-add {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #fb923c;
+  background: #fdba74;
+  font-size: 12px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.furikaeri-custom-tag-add:hover {
+  background: #ea580c;
+}
+
+/* 統計 */
+.furikaeri-stats {
+  padding-bottom: 40px;
+}
+
+.furikaeri-stats-title {
+  font-size: 20px;
+  font-weight: 400;
+  margin: 0 0 8px;
+  letter-spacing: 0.06em;
+}
+
+.furikaeri-stats-lead {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 28px;
+}
+
+.furikaeri-stats-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.furikaeri-stats-card {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.furikaeri-stats-card-label {
+  font-size: 11px;
+  color: #aaa;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.furikaeri-stats-card-value {
+  font-size: 28px;
+  font-weight: 400;
+  color: #333;
+  line-height: 1.2;
+}
+
+.furikaeri-stats-card-unit {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.furikaeri-stats-section {
+  margin-bottom: 36px;
+}
+
+.furikaeri-stats-h3 {
+  font-size: 15px;
+  font-weight: 400;
+  margin: 0 0 12px;
+  letter-spacing: 0.06em;
+}
+
+.furikaeri-stats-note {
+  font-size: 11px;
+  color: #aaa;
+  margin: 0 0 14px;
+}
+
+.furikaeri-stats-empty {
+  font-size: 13px;
+  color: #ccc;
+}
+
+.furikaeri-stats-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+  height: 120px;
+  padding: 8px 0;
+}
+
+.furikaeri-stats-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.furikaeri-stats-bar {
+  width: 100%;
+  max-width: 28px;
+  min-height: 2px;
+  background: linear-gradient(180deg, #ffedd5, #fdba74);
+  border-radius: 4px 4px 0 0;
+  margin-top: auto;
+}
+
+.furikaeri-stats-bar-label {
+  font-size: 9px;
+  color: #aaa;
+  margin-top: 6px;
+  text-align: center;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.furikaeri-stats-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  line-height: 1.4;
+}
+
+.furikaeri-stats-cloud-word {
+  color: #c2410c;
+  font-weight: 500;
+}
+
+@media (max-width: 520px) {
+  .furikaeri-stats-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 確認ダイアログ */
+.furikaeri-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.furikaeri-confirm-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.furikaeri-confirm-message {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  margin: 0 0 24px;
+}
+
+.furikaeri-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.furikaeri-confirm-cancel {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #e8e4de;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  color: #666;
+  font-family: inherit;
+}
+
+.furikaeri-confirm-cancel:hover {
+  background: #fafafa;
+}
+
+.furikaeri-confirm-ok {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #c2410c;
+  background: #ea580c;
+  font-size: 13px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.furikaeri-confirm-ok:hover {
+  background: #c2410c;
 }
