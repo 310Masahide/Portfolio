@@ -137,9 +137,16 @@ export function FurikaeriWriteView({
         className="furikaeri-analyze-btn"
         onClick={onAnalyze}
         disabled={loading || !hasContent}
+        aria-busy={loading}
       >
         {loading ? 'AIが振り返っています…' : 'AIに俯瞰してもらう'}
       </button>
+
+      {loading && (
+        <p className="furikaeri-sr-only" aria-live="polite" aria-atomic="true">
+          AIが振り返っています。しばらくお待ちください。
+        </p>
+      )}
 
       {showAiReflection && (
         <div className="furikaeri-ai-block">

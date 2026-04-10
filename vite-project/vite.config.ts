@@ -15,6 +15,26 @@ export default defineConfig(({ mode }) => {
           installDevAiProxy(server, env)
         },
       },
+      {
+        name: 'csp-production',
+        apply: 'build',
+        transformIndexHtml(html) {
+          const csp = [
+            "default-src 'self'",
+            "script-src 'self'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data:",
+            "connect-src 'self'",
+            "base-uri 'none'",
+            "form-action 'self'",
+          ].join('; ')
+          return html.replace(
+            '<head>',
+            `<head>\n    <meta http-equiv="Content-Security-Policy" content="${csp}" />`,
+          )
+        },
+      },
     ],
   }
 })
