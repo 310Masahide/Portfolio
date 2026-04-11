@@ -1,16 +1,11 @@
 import type { FurikaeriEntriesMap } from '../types/furikaeri'
 import { toDateKey } from './dateRanges'
 
-/** 記録がある日付キーを新しい順 */
-export function sortedEntryDates(entries: FurikaeriEntriesMap): string[] {
-  return Object.keys(entries).sort((a, b) => b.localeCompare(a))
-}
-
 /** 今日を終点とする連続記録日数（今日未記録なら昨日から遡る） */
 export function computeStreak(entries: FurikaeriEntriesMap): number {
   const set = new Set(Object.keys(entries))
   if (set.size === 0) return 0
-  let d = new Date()
+  const d = new Date()
   d.setHours(0, 0, 0, 0)
   let streak = 0
   for (let i = 0; i < 400; i++) {
@@ -49,18 +44,29 @@ export function recordsPerWeek(entries: FurikaeriEntriesMap, weeks: number): { l
   return out
 }
 
-/** 簡易トークン化（日本語は区切りで分割、2文字以上をカウント） */
+/** 日本語の助詞・助動詞・頻出機能語（ノイズになりやすい語） */
+const JP_STOPWORDS = new Set([
+  'ある', 'いる', 'する', 'なる', 'できる', 'いく', 'くる', 'おく', 'みる', 'しまう',
+  'ない', 'ます', 'です', 'でした', 'ました', 'だった', 'だろう', 'でしょう',
+  'から', 'まで', 'より', 'ので', 'のに', 'ため', 'ように', 'として', 'について',
+  'という', 'といった', 'そして', 'しかし', 'ただし', 'また', 'さらに', 'なお',
+  'それ', 'これ', 'あれ', 'この', 'その', 'あの', 'どの', 'ここ', 'そこ', 'あそこ',
+  'もの', 'こと', 'とき', 'ところ', 'わたし', '自分', 'みんな',
+])
+
+/** 簡易トークン化（日本語は区切りで分割、2文字以上・ストップワード除外） */
 export function wordFrequencies(entries: FurikaeriEntriesMap, topN: number): { word: string; count: number }[] {
   const text = Object.values(entries)
     .map((e) => `${e.events ?? ''} ${e.aiResponse ?? ''}`)
     .join('\n')
   const tokens = text
-    .split(/[\s\n、,，.。!！?？「」『』【】\-—/\\|]+/u)
+    .split(/[\s\n、,，.。!！?？「」『』【】（）()…・\-—/\\|：:；;]+/u)
     .map((t) => t.trim())
     .filter((t) => t.length >= 2)
   const map = new Map<string, number>()
   for (const t of tokens) {
     const k = t.toLowerCase()
+    if (JP_STOPWORDS.has(k)) continue
     map.set(k, (map.get(k) ?? 0) + 1)
   }
   return [...map.entries()]

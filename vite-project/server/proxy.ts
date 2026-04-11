@@ -14,7 +14,10 @@ function normalizeEnvValue(v: string): string {
 }
 
 function isAsciiOnly(v: string): boolean {
-  return /^[\x00-\x7F]+$/.test(v)
+  for (let i = 0; i < v.length; i++) {
+    if (v.charCodeAt(i) > 127) return false
+  }
+  return true
 }
 
 function sendJson(res: ServerResponse, status: number, payload: unknown): void {
@@ -108,7 +111,13 @@ async function handlePromptProxy(
   try {
     const body = await readBodyLimited(req, res, MAX_AI_PROXY_BODY_BYTES)
     if (body === null) return
-    const parsed = JSON.parse(body || '{}') as { prompt?: string }
+    let parsed: { prompt?: string }
+    try {
+      parsed = JSON.parse(body || '{}') as { prompt?: string }
+    } catch {
+      sendJson(res, 400, { error: { message: 'Invalid JSON body' } })
+      return
+    }
     const prompt = String(parsed.prompt ?? '')
     const upstream = await fetchUpstream(prompt)
     await forwardUpstreamJson(res, upstream)

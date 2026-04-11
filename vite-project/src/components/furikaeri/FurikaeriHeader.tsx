@@ -20,11 +20,13 @@ export function FurikaeriHeader({ view, onViewChange }: FurikaeriHeaderProps) {
           <div className="furikaeri-header-label">Daily Reflection</div>
           <h1 className="furikaeri-title">振り返り</h1>
         </div>
-        <nav className="furikaeri-nav">
+        <nav className="furikaeri-nav" role="tablist" aria-label="メインナビゲーション">
           {tabs.map(([v, label]) => (
             <button
               key={v}
               type="button"
+              role="tab"
+              aria-selected={view === v}
               className={`furikaeri-tab furikaeri-tab-${v} ${view === v ? 'active' : ''}`}
               onClick={() => onViewChange(v)}
             >

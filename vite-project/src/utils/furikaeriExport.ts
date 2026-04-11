@@ -1,6 +1,21 @@
 import type { FurikaeriEntriesMap, FurikaeriEntry } from '../types/furikaeri'
+import { getTodayKey } from './date'
 
 const EXPORT_VERSION = 1
+
+function triggerBlobDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob)
+  try {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
 
 function normalizeImportedEntry(raw: unknown, keyFallback?: string): FurikaeriEntry | null {
   if (!raw || typeof raw !== 'object') return null
@@ -58,12 +73,7 @@ export function downloadFurikaeriBackup(entries: FurikaeriEntriesMap): void {
     entries,
   }
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `furikaeri-backup-${new Date().toISOString().slice(0, 10)}.json`
-  a.click()
-  URL.revokeObjectURL(url)
+  triggerBlobDownload(blob, `furikaeri-backup-${new Date().toISOString().slice(0, 10)}.json`)
 }
 
 export function entriesToPlainText(entries: FurikaeriEntriesMap): string {
@@ -88,10 +98,5 @@ export function entriesToPlainText(entries: FurikaeriEntriesMap): string {
 
 export function downloadFurikaeriText(entries: FurikaeriEntriesMap): void {
   const blob = new Blob([entriesToPlainText(entries)], { type: 'text/plain;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `furikaeri-${new Date().toISOString().slice(0, 10)}.txt`
-  a.click()
-  URL.revokeObjectURL(url)
+  triggerBlobDownload(blob, `furikaeri-${getTodayKey()}.txt`)
 }

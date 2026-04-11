@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { flushSync } from 'react-dom'
 import type {
   FurikaeriEntriesMap,
   FurikaeriEntry,
@@ -46,19 +47,42 @@ export function useFurikaeri() {
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [historyPage, setHistoryPage] = useState(1)
   const [historyMode, setHistoryMode] = useState<HistoryDisplayMode>('list')
-  const now = new Date()
-  const [calendarYear, setCalendarYear] = useState(now.getFullYear())
-  const [calendarMonth, setCalendarMonth] = useState(now.getMonth())
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear())
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth())
 
   const todayKey = getTodayKey()
+  const formRef = useRef(form)
+  formRef.current = form
+  const todayKeyRef = useRef(todayKey)
+  todayKeyRef.current = todayKey
   const recordingBaseRef = useRef<string>('')
   const aiSourceEventsRef = useRef<string | null>(null)
+  const analyzeSeqRef = useRef(0)
+  const analyzeAbortRef = useRef<AbortController | null>(null)
+
+  const [storageError, setStorageError] = useState<string | null>(null)
+
+  const schedulePersistNotice = useCallback((persisted: boolean) => {
+    Promise.resolve().then(() => {
+      setStorageError(
+        persisted
+          ? null
+          : 'ブラウザへの保存に失敗しました。ストレージの空き容量やプライベートモードをご確認ください。',
+      )
+    })
+  }, [])
+
+  const dismissStorageError = useCallback(() => setStorageError(null), [])
 
   const speech = useSpeechRecognition()
   const speechError = speech.error
 
   useEffect(() => {
     setFadeIn(true)
+  }, [])
+
+  useEffect(() => {
+    return () => analyzeAbortRef.current?.abort()
   }, [])
 
   useEffect(() => {
@@ -72,6 +96,7 @@ export function useFurikaeri() {
       aiSourceEventsRef.current = today.aiResponse ? (today.events ?? '') : null
     } else {
       setForm(initialForm)
+      setAiResponse('')
       aiSourceEventsRef.current = null
     }
   }, [entries, todayKey])
@@ -83,6 +108,21 @@ export function useFurikaeri() {
     const merged = base ? (t ? `${base}\n${t}` : base) : t
     setForm((prev) => ({ ...prev, events: merged }))
   }, [speech.isListening, speech.transcript])
+
+  // 出来事テキスト変更を1.5秒後に自動保存（タグ操作・AI分析なしでの消失を防ぐ）
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const tk = todayKeyRef.current
+      setEntries((prev) => {
+        // 今日の記録がなく入力も空なら新規エントリを作らない
+        if (!formRef.current.events && !prev[tk]) return prev
+        const out = upsertTodayDraft(prev, tk, formRef.current)
+        schedulePersistNotice(out.persisted)
+        return out.map
+      })
+    }, 1500)
+    return () => clearTimeout(id)
+  }, [form.events, schedulePersistNotice])
 
   const filterOptions: HistoryFilterOptions = useMemo(
     () => ({
@@ -102,7 +142,7 @@ export function useFurikaeri() {
 
   useEffect(() => {
     setHistoryPage(1)
-  }, [historyQuery, dateFrom, dateTo, historyTagFilter.join(','), favoritesOnly])
+  }, [historyQuery, dateFrom, dateTo, historyTagFilter, favoritesOnly])
 
   const totalFiltered = filteredSortedDates.length
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE))
@@ -120,32 +160,38 @@ export function useFurikaeri() {
     return [...s].sort()
   }, [entries])
 
-  const saveEntry = useCallback(
-    (aiRes: string) => {
-      const updated = upsertTodayEntry(entries, todayKey, form, aiRes)
-      setEntries(updated)
-    },
-    [entries, todayKey, form],
-  )
-
   const handleAnalyze = useCallback(async () => {
-    if (!form.events.trim()) return
-    const snapshot = form.events
+    const f = formRef.current
+    if (!f.events.trim()) return
+    analyzeAbortRef.current?.abort()
+    const ac = new AbortController()
+    analyzeAbortRef.current = ac
+    const seq = ++analyzeSeqRef.current
+    const snapshot = f.events
     setLoading(true)
     setAiResponse('')
     try {
-      const text = await analyzeFurikaeri(form)
+      const text = await analyzeFurikaeri(f, { signal: ac.signal })
+      if (seq !== analyzeSeqRef.current) return
       setAiResponse(text)
-      saveEntry(text)
+      const tk = todayKeyRef.current
+      const latest = formRef.current
+      setEntries((prev) => {
+        const out = upsertTodayEntry(prev, tk, latest, text)
+        schedulePersistNotice(out.persisted)
+        return out.map
+      })
       aiSourceEventsRef.current = snapshot
     } catch (e) {
+      if (seq !== analyzeSeqRef.current) return
+      if (e instanceof DOMException && e.name === 'AbortError') return
       const msg = e instanceof Error ? e.message : 'Unknown error'
       setAiResponse(`エラーが発生しました: ${msg}`)
       aiSourceEventsRef.current = snapshot
     } finally {
-      setLoading(false)
+      if (seq === analyzeSeqRef.current) setLoading(false)
     }
-  }, [form, saveEntry])
+  }, [schedulePersistNotice])
 
   const showAiReflection = useMemo(() => {
     if (!aiResponse) return false
@@ -160,17 +206,25 @@ export function useFurikaeri() {
 
   const toggleFormTag = useCallback(
     (tag: string) => {
-      setForm((prev) => {
-        const has = prev.tags.includes(tag)
-        const nextTags = has ? prev.tags.filter((t) => t !== tag) : [...prev.tags, tag]
-        const next = { ...prev, tags: nextTags }
-        window.setTimeout(() => {
-          setEntries((e) => upsertTodayDraft(e, todayKey, next))
-        }, 0)
-        return next
+      let next: FurikaeriForm | undefined
+      flushSync(() => {
+        setForm((prev) => {
+          const has = prev.tags.includes(tag)
+          const nextTags = has ? prev.tags.filter((t) => t !== tag) : [...prev.tags, tag]
+          next = { ...prev, tags: nextTags }
+          return next
+        })
+      })
+      if (!next) return
+      const draft = next
+      const tk = todayKeyRef.current
+      setEntries((e) => {
+        const out = upsertTodayDraft(e, tk, draft)
+        schedulePersistNotice(out.persisted)
+        return out.map
       })
     },
-    [todayKey],
+    [schedulePersistNotice],
   )
 
   const startVoiceInput = useCallback(() => {
@@ -185,7 +239,7 @@ export function useFurikaeri() {
 
   const isVoiceSupported = speech.isSupported
   const isListening = speech.isListening
-  const liveTranscript = useMemo(() => speech.transcript, [speech.transcript])
+  const liveTranscript = speech.transcript
 
   const openDetail = useCallback((entry: FurikaeriEntry) => {
     setSelectedEntry(entry)
@@ -199,46 +253,48 @@ export function useFurikaeri() {
 
   const handleDeleteOne = useCallback(
     (date: string) => {
-      if (!window.confirm('この1件の記録を削除しますか？')) return
-      const next = deleteEntryByDate(entries, date)
-      setEntries(next)
+      const out = deleteEntryByDate(entries, date)
+      setEntries(out.map)
+      schedulePersistNotice(out.persisted)
       if (selectedEntry?.date === date) {
         setSelectedEntry(null)
         setView('history')
       }
     },
-    [entries, selectedEntry],
+    [entries, selectedEntry, schedulePersistNotice],
   )
 
   const handleClearAll = useCallback(() => {
-    if (!window.confirm('すべての履歴を消去しますか？この操作は元に戻せません。')) return
-    clearAllEntries()
+    const ok = clearAllEntries()
     setEntries({})
+    schedulePersistNotice(ok)
     if (view === 'history' || view === 'detail') {
       setView('write')
       setSelectedEntry(null)
     }
-  }, [view])
+  }, [view, schedulePersistNotice])
 
   const togglePin = useCallback(
     (date: string) => {
       const e = entries[date]
       if (!e) return
-      const next = patchEntry(entries, date, { pinned: !e.pinned })
-      setEntries(next)
-      setSelectedEntry((prev) => (prev?.date === date ? next[date] : prev))
+      const out = patchEntry(entries, date, { pinned: !e.pinned })
+      setEntries(out.map)
+      schedulePersistNotice(out.persisted)
+      setSelectedEntry((prev) => (prev?.date === date ? out.map[date] : prev))
     },
-    [entries],
+    [entries, schedulePersistNotice],
   )
 
   const updateEntryTags = useCallback(
     (date: string, tags: string[]) => {
       const uniq = [...new Set(tags.filter(Boolean))]
-      const next = patchEntry(entries, date, { tags: uniq.length ? uniq : undefined })
-      setEntries(next)
-      setSelectedEntry((prev) => (prev?.date === date ? next[date] : prev))
+      const out = patchEntry(entries, date, { tags: uniq.length ? uniq : undefined })
+      setEntries(out.map)
+      schedulePersistNotice(out.persisted)
+      setSelectedEntry((prev) => (prev?.date === date ? out.map[date] : prev))
     },
-    [entries],
+    [entries, schedulePersistNotice],
   )
 
   const toggleHistoryTagFilter = useCallback((tag: string) => {
@@ -269,12 +325,13 @@ export function useFurikaeri() {
         result = { ok: false, error: r.error }
         return prev
       }
-      saveFurikaeriEntries(r.entries)
+      const out = saveFurikaeriEntries(r.entries)
       result = { ok: true }
-      return r.entries
+      schedulePersistNotice(out.persisted)
+      return out.map
     })
     return result
-  }, [])
+  }, [schedulePersistNotice])
 
   const setViewWrapped = useCallback((v: FurikaeriView) => {
     setView(v)
@@ -334,5 +391,7 @@ export function useFurikaeri() {
     speechError,
     startVoiceInput,
     stopVoiceInput,
+    storageError,
+    dismissStorageError,
   }
 }

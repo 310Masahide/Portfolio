@@ -1,22 +1,38 @@
 import type { FurikaeriEntriesMap, FurikaeriEntry, FurikaeriForm } from '../types/furikaeri'
+import { normalizeStoredFurikaeriEntry } from './furikaeriEntryNormalize'
 
 const STORAGE_KEY = 'furikaeri_entries'
 
-function normalizeEntry(raw: unknown, keyFallback?: string): FurikaeriEntry | null {
-  if (!raw || typeof raw !== 'object') return null
-  const o = raw as Record<string, unknown>
-  let date = typeof o.date === 'string' ? o.date : ''
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) && keyFallback && /^\d{4}-\d{2}-\d{2}$/.test(keyFallback)) {
-    date = keyFallback
-  }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
-  const tags = Array.isArray(o.tags) ? o.tags.filter((t): t is string => typeof t === 'string') : undefined
+export type PersistOutcome = { map: FurikaeriEntriesMap; persisted: boolean }
+
+type TodayAiMerge =
+  | { kind: 'explicit'; value: string | undefined }
+  | { kind: 'inherit' }
+
+function buildTodaySlot(
+  todayKey: string,
+  form: FurikaeriForm,
+  prev: FurikaeriEntry | undefined,
+  ai: TodayAiMerge,
+): FurikaeriEntry {
+  const tagList = form.tags?.filter(Boolean) ?? []
+  const aiResponse = ai.kind === 'inherit' ? prev?.aiResponse : ai.value || undefined
   return {
-    date,
-    events: typeof o.events === 'string' ? o.events : undefined,
-    aiResponse: typeof o.aiResponse === 'string' ? o.aiResponse : undefined,
-    pinned: o.pinned === true,
-    tags: tags?.length ? [...new Set(tags)] : undefined,
+    date: todayKey,
+    events: form.events || undefined,
+    aiResponse,
+    pinned: prev?.pinned,
+    tags: tagList.length > 0 ? [...new Set(tagList)] : undefined,
+  }
+}
+
+function persistMap(map: FurikaeriEntriesMap): PersistOutcome {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(map))
+    return { map, persisted: true }
+  } catch (e) {
+    console.error('[furikaeriStorage] localStorage.setItem failed', e)
+    return { map, persisted: false }
   }
 }
 
@@ -28,7 +44,7 @@ export function loadFurikaeriEntries(): FurikaeriEntriesMap {
     if (typeof parsed !== 'object' || parsed === null) return {}
     const out: FurikaeriEntriesMap = {}
     for (const k of Object.keys(parsed)) {
-      const e = normalizeEntry(parsed[k], k)
+      const e = normalizeStoredFurikaeriEntry(parsed[k], k)
       if (e) out[e.date] = e
     }
     return out
@@ -37,30 +53,20 @@ export function loadFurikaeriEntries(): FurikaeriEntriesMap {
   }
 }
 
-export function saveFurikaeriEntries(entries: FurikaeriEntriesMap): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
-}
-
 export function upsertTodayEntry(
   current: FurikaeriEntriesMap,
   todayKey: string,
   form: FurikaeriForm,
   aiResponse?: string,
-): FurikaeriEntriesMap {
+): PersistOutcome {
   const prev = current[todayKey]
-  const tagList = form.tags?.filter(Boolean) ?? []
+  const merge: TodayAiMerge =
+    aiResponse !== undefined ? { kind: 'explicit', value: aiResponse } : { kind: 'inherit' }
   const updated: FurikaeriEntriesMap = {
     ...current,
-    [todayKey]: {
-      date: todayKey,
-      events: form.events || undefined,
-      aiResponse: aiResponse !== undefined ? aiResponse || undefined : prev?.aiResponse,
-      pinned: prev?.pinned,
-      tags: tagList.length > 0 ? [...new Set(tagList)] : undefined,
-    },
+    [todayKey]: buildTodaySlot(todayKey, form, prev, merge),
   }
-  saveFurikaeriEntries(updated)
-  return updated
+  return persistMap(updated)
 }
 
 /** AI 解析なしで本文・タグだけ保存（タグ変更の即時反映用） */
@@ -68,44 +74,47 @@ export function upsertTodayDraft(
   current: FurikaeriEntriesMap,
   todayKey: string,
   form: FurikaeriForm,
-): FurikaeriEntriesMap {
+): PersistOutcome {
   const prev = current[todayKey]
-  const tagList = form.tags?.filter(Boolean) ?? []
   const updated: FurikaeriEntriesMap = {
     ...current,
-    [todayKey]: {
-      date: todayKey,
-      events: form.events || undefined,
-      aiResponse: prev?.aiResponse,
-      pinned: prev?.pinned,
-      tags: tagList.length > 0 ? [...new Set(tagList)] : undefined,
-    },
+    [todayKey]: buildTodaySlot(todayKey, form, prev, { kind: 'inherit' }),
   }
-  saveFurikaeriEntries(updated)
-  return updated
+  return persistMap(updated)
 }
 
 export function patchEntry(
   current: FurikaeriEntriesMap,
   date: string,
   patch: Partial<Pick<FurikaeriEntry, 'pinned' | 'tags' | 'events' | 'aiResponse'>>,
-): FurikaeriEntriesMap {
+): PersistOutcome {
   const e = current[date]
-  if (!e) return current
+  if (!e) return { map: current, persisted: true }
   const next: FurikaeriEntriesMap = {
     ...current,
     [date]: { ...e, ...patch },
   }
-  saveFurikaeriEntries(next)
-  return next
+  return persistMap(next)
 }
 
-export function clearAllEntries(): void {
-  localStorage.removeItem(STORAGE_KEY)
+export function clearAllEntries(): boolean {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+    return true
+  } catch (e) {
+    console.error('[furikaeriStorage] localStorage.removeItem failed', e)
+    return false
+  }
 }
 
-export function deleteEntryByDate(current: FurikaeriEntriesMap, date: string): FurikaeriEntriesMap {
-  const { [date]: _, ...rest } = current
-  saveFurikaeriEntries(rest)
-  return rest
+export function deleteEntryByDate(current: FurikaeriEntriesMap, date: string): PersistOutcome {
+  if (!current[date]) return { map: current, persisted: true }
+  const rest = { ...current }
+  delete rest[date]
+  return persistMap(rest)
+}
+
+/** マージ結果などを一括で保存（JSON インポート用） */
+export function saveFurikaeriEntries(map: FurikaeriEntriesMap): PersistOutcome {
+  return persistMap(map)
 }
