@@ -113,3 +113,8 @@ export function deleteEntryByDate(current: FurikaeriEntriesMap, date: string): P
   delete rest[date]
   return persistMap(rest)
 }
+
+/** マージ結果などを一括で保存（JSON インポート用） */
+export function saveFurikaeriEntries(map: FurikaeriEntriesMap): PersistOutcome {
+  return persistMap(map)
+}

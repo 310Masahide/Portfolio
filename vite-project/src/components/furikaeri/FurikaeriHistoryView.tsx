@@ -1,4 +1,4 @@
-import { useMemo, type ChangeEvent } from 'react'
+import { useMemo, useRef, type ChangeEvent } from 'react'
 import { formatDate } from '../../utils/date'
 import type { FurikaeriEntry, HistoryDisplayMode } from '../../types/furikaeri'
 import { splitForHighlight } from '../../utils/furikaeriFilters'
@@ -206,7 +206,9 @@ interface FurikaeriHistoryViewProps {
   onClearAll: () => void
   onDeleteOne: (date: string) => void
   onTogglePin: (date: string) => void
+  exportJson: () => void
   exportText: () => void
+  importBackupJson: (text: string) => { ok: boolean; error?: string }
 }
 
 function FilterToolbar({ filter }: { filter: HistoryFilterProps }) {
@@ -316,12 +318,26 @@ export function FurikaeriHistoryView({
   onClearAll,
   onDeleteOne,
   onTogglePin,
+  exportJson,
   exportText,
+  importBackupJson,
 }: FurikaeriHistoryViewProps) {
   const { historyPage, totalPages, pageSize, setHistoryPage } = paginationProps
   const { historyMode, setHistoryMode, calendarYear, calendarMonth, setCalendarYear, setCalendarMonth } =
     displayProps
   const { historyQuery } = filterProps
+
+  const fileRef = useRef<HTMLInputElement>(null)
+  const onImportPick = () => fileRef.current?.click()
+  const onImportChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    e.target.value = ''
+    if (!f) return
+    const text = await f.text()
+    const r = importBackupJson(text)
+    if (!r.ok) window.alert(r.error ?? '読み込みに失敗しました')
+    else window.alert('バックアップをマージしました（同一日付はファイルの内容で上書き）')
+  }
 
   const entryCount = Object.keys(entries).length
 
@@ -334,6 +350,20 @@ export function FurikaeriHistoryView({
             : `表示 ${totalFiltered}件 / 全 ${entryCount}件`}
         </p>
         <div className="furikaeri-history-header-actions">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            className="furikaeri-file-input"
+            onChange={onImportChange}
+            aria-label="JSONバックアップを選択"
+          />
+          <button type="button" className="furikaeri-export-btn" onClick={onImportPick}>
+            JSON読込
+          </button>
+          <button type="button" className="furikaeri-export-btn" onClick={exportJson}>
+            JSON出力
+          </button>
           <button type="button" className="furikaeri-export-btn" onClick={exportText}>
             テキスト出力
           </button>

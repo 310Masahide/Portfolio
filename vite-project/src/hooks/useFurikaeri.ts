@@ -13,13 +13,18 @@ import {
   deleteEntryByDate,
   loadFurikaeriEntries,
   patchEntry,
+  saveFurikaeriEntries,
   upsertTodayDraft,
   upsertTodayEntry,
 } from '../utils/furikaeriStorage'
 import { analyzeFurikaeri } from '../api/furikaeriClient'
 import { useSpeechRecognition } from './useSpeechRecognition'
 import { filterSortedDates, type HistoryFilterOptions } from '../utils/furikaeriFilters'
-import { downloadFurikaeriText } from '../utils/furikaeriExport'
+import {
+  downloadFurikaeriBackup,
+  downloadFurikaeriText,
+  mergeImportedEntries,
+} from '../utils/furikaeriExport'
 import { presetRange } from '../utils/dateRanges'
 
 const initialForm: FurikaeriForm = { events: '', tags: [] }
@@ -309,7 +314,24 @@ export function useFurikaeri() {
     setDateTo(r.to)
   }, [])
 
+  const exportJson = useCallback(() => downloadFurikaeriBackup(entries), [entries])
   const exportText = useCallback(() => downloadFurikaeriText(entries), [entries])
+
+  const importBackupJson = useCallback((text: string): { ok: boolean; error?: string } => {
+    let result: { ok: boolean; error?: string } = { ok: false, error: '不明なエラー' }
+    setEntries((prev) => {
+      const r = mergeImportedEntries(prev, text)
+      if (!r.ok) {
+        result = { ok: false, error: r.error }
+        return prev
+      }
+      const out = saveFurikaeriEntries(r.entries)
+      result = { ok: true }
+      schedulePersistNotice(out.persisted)
+      return out.map
+    })
+    return result
+  }, [schedulePersistNotice])
 
   const setViewWrapped = useCallback((v: FurikaeriView) => {
     setView(v)
@@ -360,7 +382,9 @@ export function useFurikaeri() {
     handleClearAll,
     togglePin,
     updateEntryTags,
+    exportJson,
     exportText,
+    importBackupJson,
     isVoiceSupported,
     isListening,
     liveTranscript,

@@ -11,44 +11,6 @@
   opacity: 1;
 }
 
-.furikaeri-storage-banner {
-  border-bottom: 1px solid #fecaca;
-  background: #fef2f2;
-  color: #991b1b;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.furikaeri-storage-banner-inner {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 12px 24px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.furikaeri-storage-banner p {
-  margin: 0;
-  flex: 1;
-}
-
-.furikaeri-storage-banner-dismiss {
-  flex-shrink: 0;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid #dc2626;
-  background: #fff;
-  color: #991b1b;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.furikaeri-storage-banner-dismiss:hover {
-  background: #fee2e2;
-}
-
 .furikaeri-app :where(button, input, textarea, select) {
   font-family: inherit;
 }
@@ -484,6 +446,18 @@
   align-items: center;
 }
 
+.furikaeri-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .furikaeri-export-btn {
   padding: 6px 12px;
   border-radius: 999px;
@@ -840,8 +814,7 @@
   justify-content: center;
   gap: 3px;
   cursor: pointer;
-  font-family: inherit;
-  padding: 4px 3px 5px;
+  padding: 4px;
 }
 
 .furikaeri-calendar-day:disabled {

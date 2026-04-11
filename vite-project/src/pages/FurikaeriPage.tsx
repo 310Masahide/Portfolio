@@ -63,7 +63,9 @@ export default function FurikaeriPage() {
     handleDeleteOne,
     togglePin,
     updateEntryTags,
+    exportJson,
     exportText,
+    importBackupJson,
     storageError,
     dismissStorageError,
   } = useFurikaeri()
@@ -171,7 +173,9 @@ export default function FurikaeriPage() {
             onClearAll={requestClearAll}
             onDeleteOne={requestDeleteOne}
             onTogglePin={togglePin}
+            exportJson={exportJson}
             exportText={exportText}
+            importBackupJson={importBackupJson}
           />
         )}
 
