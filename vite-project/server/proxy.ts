@@ -1,11 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { ViteDevServer } from 'vite'
+import { fetchGeminiGenerate, fetchOpenAiResponses } from './devAiProxyUpstream'
 
 const MAX_AI_PROXY_BODY_BYTES = 100 * 1024
-
-const GEMINI_GENERATE_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
-const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses'
 
 function normalizeEnvValue(v: string): string {
   const trimmed = v.trim()
@@ -136,9 +133,7 @@ export function installDevAiProxy(server: ViteDevServer, env: Record<string, str
     const openaiKey = normalizeEnvValue(env.OPENAI_API_KEY ?? '')
     sendJson(res, 200, {
       hasGeminiKey: Boolean(geminiKey),
-      geminiKeyLength: geminiKey.length,
       hasOpenAIKey: Boolean(openaiKey),
-      openaiKeyLength: openaiKey.length,
     })
   })
 
@@ -150,27 +145,7 @@ export function installDevAiProxy(server: ViteDevServer, env: Record<string, str
         'Invalid API key: non-ASCII characters detected. キーに日本語/全角文字が混ざっています。Gemini の API Key を再コピーして貼り直してください。',
     })
     if (!apiKey) return
-    await handlePromptProxy(req, res, (prompt) =>
-      fetch(GEMINI_GENERATE_URL, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-goog-api-key': apiKey,
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: prompt }],
-            },
-          ],
-          generationConfig: {
-            maxOutputTokens: 4096,
-            temperature: 0.7,
-          },
-        }),
-      }),
-    )
+    await handlePromptProxy(req, res, (prompt) => fetchGeminiGenerate(apiKey, prompt, env))
   })
 
   middlewares.use('/api/openai', async (req, res) => {
@@ -181,20 +156,6 @@ export function installDevAiProxy(server: ViteDevServer, env: Record<string, str
         'Invalid API key: non-ASCII characters detected. キーに日本語/全角文字が混ざっています。OpenAI の API Key を再コピーして貼り直してください。',
     })
     if (!apiKey) return
-    await handlePromptProxy(req, res, (prompt) =>
-      fetch(OPENAI_RESPONSES_URL, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4.1-mini',
-          input: prompt,
-          max_output_tokens: 900,
-          temperature: 0.7,
-        }),
-      }),
-    )
+    await handlePromptProxy(req, res, (prompt) => fetchOpenAiResponses(apiKey, prompt, env))
   })
 }
